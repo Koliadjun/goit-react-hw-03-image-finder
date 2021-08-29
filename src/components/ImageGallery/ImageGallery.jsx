@@ -1,12 +1,10 @@
-import React, { Children, Component } from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 
-export class ImageGallery extends Component {
-  static propTypes = { children: PropTypes.element };
+const ImageGallery = () => {
+  return <ul className="ImageGallery">{this.props.children}</ul>;
+};
 
-  render() {
-    return <ul className="ImageGallery">{this.props.children}</ul>;
-  }
-}
+ImageGallery.propTypes = { children: PropTypes.element };
 
 export default ImageGallery;
