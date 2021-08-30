@@ -7,7 +7,7 @@ const Button = ({ children, onClick }) => {
     </button>
   );
 };
-Button.prpsType = {
+Button.propType = {
   children: PropTypes.element,
   onClick: PropTypes.func.isRequired,
 };
