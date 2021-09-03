@@ -1,3 +1,4 @@
+import Loader from 'react-loader-spinner';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
@@ -21,12 +22,16 @@ export class ImageGallery extends Component {
   };
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchQuery !== this.props.searchQuery) {
-      this.fetchData()
-        .then(data => this.setState({ images: [...data.hits], page: 1 }))
-        .catch(error =>
-          this.setState({ status: STATUS.rejected, error: error }),
-        )
-        .finally(() => this.setState({ status: STATUS.resolved }));
+      this.fetchData().then(data =>
+        this.setState({
+          images: [...data.hits],
+          page: 1,
+          status: STATUS.resolved,
+        }),
+      );
+      // .catch(error => {
+      //   this.setState({ status: STATUS.rejected, error });
+      // });
     }
     if (
       prevState.page !== this.state.page &&
@@ -35,12 +40,17 @@ export class ImageGallery extends Component {
     ) {
       this.fetchData(this.state.page)
         .then(data =>
-          this.setState({ images: [...prevState.images, ...data.hits] }),
+          this.setState({
+            images: [...prevState.images, ...data.hits],
+            status: STATUS.resolved,
+          }),
         )
-        .catch(error =>
-          this.setState({ status: STATUS.rejected, error: error }),
-        )
-        .finally(() => this.setState({ status: STATUS.resolved }));
+        .then(() => {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          });
+        });
     }
   }
 
@@ -51,13 +61,17 @@ export class ImageGallery extends Component {
     return fetch(
       `${BASE_URL}&q=${searchQuery}&per_page=${perPage}&page=${page}`,
     )
-      .then(r => {
-        if (!r.ok) {
-          throw Error(`error request ${searchQuery}`);
+      .then(r => r.json())
+      .then(data => {
+        if (data.hits.length === 0) {
+          throw new Error(`Немає фото за цим ${searchQuery} запитом`);
+        } else {
+          return data;
         }
       })
-      .then(data => data.json());
+      .catch(error => this.setState({ status: STATUS.rejected, error }));
   };
+
   loadMoreClickHandler = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
@@ -68,20 +82,31 @@ export class ImageGallery extends Component {
       return <></>;
     }
     if (status === STATUS.pending) {
-      return <h1>Loading</h1>;
+      return (
+        <div className="loaderWrapper">
+          <Loader type="ThreeDots" color="#00BFFF" height={100} width={100} />
+        </div>
+      );
     }
     if (status === STATUS.rejected) {
-      return <div>this.state.error();</div>;
+      return <div>{this.state.error}</div>;
     }
     if (status === STATUS.resolved) {
       return (
         <>
           <ul className="ImageGallery">
             {this.state.images.map(image => (
-              <ImageGalleryItem key={image.id} src={image.webformatURL} />
+              <ImageGalleryItem
+                key={image.id}
+                src={image.webformatURL}
+                largeImg={image.largeImageURL}
+                onClick={this.props.onClick}
+              />
             ))}
           </ul>
-          <Button onClick={this.loadMoreClickHandler}>Load more</Button>
+          <div className="buttonWrapper">
+            <Button onClick={this.loadMoreClickHandler}>Load more</Button>
+          </div>
         </>
       );
     }

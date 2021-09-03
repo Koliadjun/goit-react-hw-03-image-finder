@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import s from './button.module.css';
 const Button = ({ children, onClick }) => {
   return (
-    <button type="button" onClick={onClick}>
+    <button className={s.Button} type="button" onClick={onClick}>
       {children}
     </button>
   );

@@ -5,9 +5,12 @@ export class ImageGalleryItem extends Component {
   //   static propTypes = { image: PropTypes.array.isRequired };
 
   render() {
-    const { src } = this.props;
+    const { src, onClick } = this.props;
     return (
-      <li className="ImageGalleryItem">
+      <li
+        className="ImageGalleryItem"
+        onClick={() => onClick(this.props.largeImg)}
+      >
         <img src={src} alt="" className="ImageGalleryItem-image" />
       </li>
     );
