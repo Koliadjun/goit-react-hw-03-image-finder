@@ -72,7 +72,6 @@ export class ImageGallery extends Component {
         });
     }
   }
-
   fetchData = (page = 1) => {
     const { perPage } = this.state;
     const { searchQuery } = this.props;
