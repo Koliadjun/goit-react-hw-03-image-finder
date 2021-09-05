@@ -94,7 +94,7 @@ export class ImageGallery extends Component {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
   render() {
-    const { status, error } = this.state;
+    const { status } = this.state;
 
     if (status === STATUS.idle) {
       return <h2 className={'title'}>Введіть пошуковий запит</h2>;
