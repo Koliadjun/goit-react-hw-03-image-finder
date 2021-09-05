@@ -42,10 +42,8 @@ export class ImageGallery extends Component {
           }),
         )
         .catch(error => {
-          {
-            this.setState({ status: STATUS.rejected, error });
-            toast.error(`${error.message}`, options);
-          }
+          this.setState({ status: STATUS.rejected, error });
+          toast.error(`${error.message}`, options);
         });
     }
     if (
