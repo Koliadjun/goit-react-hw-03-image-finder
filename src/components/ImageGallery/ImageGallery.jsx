@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 import Button from '../Button/Button';
+import { toast } from 'react-toastify';
+
 const BASE_URL =
   'https://pixabay.com/api/?key=21859893-eed1f1d786560e2667ad1f26b&image_type=photo&orientation=horizontal';
 const STATUS = {
@@ -11,6 +13,15 @@ const STATUS = {
   rejected: 'rejected',
   resolved: 'resolved',
 };
+const options = {
+  position: 'top-right',
+  autoClose: 5000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined,
+};
 export class ImageGallery extends Component {
   static propTypes = { searchQuery: PropTypes.string };
   state = {
@@ -18,20 +29,24 @@ export class ImageGallery extends Component {
     page: 1,
     perPage: 12,
     status: STATUS.idle,
-    error: '',
+    error: null,
   };
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchQuery !== this.props.searchQuery) {
-      this.fetchData().then(data =>
-        this.setState({
-          images: [...data.hits],
-          page: 1,
-          status: STATUS.resolved,
-        }),
-      );
-      // .catch(error => {
-      //   this.setState({ status: STATUS.rejected, error });
-      // });
+      this.fetchData()
+        .then(data =>
+          this.setState({
+            images: [...data.hits],
+            page: 1,
+            status: STATUS.resolved,
+          }),
+        )
+        .catch(error => {
+          {
+            this.setState({ status: STATUS.rejected, error });
+            toast.error(`${error.message}`, options);
+          }
+        });
     }
     if (
       prevState.page !== this.state.page &&
@@ -50,6 +65,10 @@ export class ImageGallery extends Component {
             top: document.documentElement.scrollHeight,
             behavior: 'smooth',
           });
+        })
+        .catch(error => {
+          this.setState({ status: STATUS.rejected, error });
+          toast.error(`${error.message}`, options);
         });
     }
   }
@@ -64,22 +83,21 @@ export class ImageGallery extends Component {
       .then(r => r.json())
       .then(data => {
         if (data.hits.length === 0) {
-          throw new Error(`Немає фото за цим ${searchQuery} запитом`);
+          throw new Error(`Немає фото за пошуковим запитом "${searchQuery}"`);
         } else {
           return data;
         }
-      })
-      .catch(error => this.setState({ status: STATUS.rejected, error }));
+      });
   };
 
   loadMoreClickHandler = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
   render() {
-    const { status } = this.state;
+    const { status, error } = this.state;
 
     if (status === STATUS.idle) {
-      return <></>;
+      return <h2 className={'title'}>Введіть пошуковий запит</h2>;
     }
     if (status === STATUS.pending) {
       return (
@@ -89,7 +107,10 @@ export class ImageGallery extends Component {
       );
     }
     if (status === STATUS.rejected) {
-      return <div>{this.state.error}</div>;
+      setInterval(() => {
+        this.setState({ status: STATUS.idle });
+      }, 5000);
+      return <></>;
     }
     if (status === STATUS.resolved) {
       return (
