@@ -104,7 +104,7 @@ export class ImageGallery extends Component {
       );
     }
     if (status === STATUS.rejected) {
-      setInterval(() => {
+      setTimeout(() => {
         this.setState({ status: STATUS.idle });
       }, 5000);
       return <></>;
